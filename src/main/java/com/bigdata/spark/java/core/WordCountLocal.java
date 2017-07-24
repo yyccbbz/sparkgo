@@ -35,9 +35,7 @@ public class WordCountLocal {
         JavaPairRDD<String, Integer> counts = words.mapToPair(word -> new Tuple2<String, Integer>(word, 1))
                                                    .reduceByKey((x, y) -> x + y);
 
-        counts.foreach(count -> {
-            System.out.println(count._1() + " : " + count._2());
-        });
+        counts.foreach(count -> System.out.println(count._1() + " : " + count._2()));
 
 //        counts.saveAsTextFile("E:\\Workspace\\intellij2017\\sparkgo\\src\\main\\resources\\txt\\output.txt");
 
