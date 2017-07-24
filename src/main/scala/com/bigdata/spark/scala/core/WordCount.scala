@@ -8,26 +8,19 @@ import org.apache.spark.{SparkConf, SparkContext}
   * @@Author: CuiCan
   * @@Date: 2017-7-24
   * @@Time: 15:30
-  * @@Description:
+  * @@Description: scala 版本 wordcount
   */
 object WordCount {
 
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setAppName("WordCount")
-    //setMaster("local") 本机的spark就用local，远端的就写ip
-    //如果是打成jar包运行则需要去掉 setMaster("local")因为在参数中会指定。
-    conf.setMaster("local")
-
     val sc = new SparkContext(conf)
-    val rdd = sc.parallelize(List(1, 2, 3, 4, 5, 6)).map(_ * 3)
-    val mappedRDD = rdd.filter(_ > 10).collect()
-    //对集合求和
-    println(rdd.reduce(_ + _))
-    //输出大于10的元素
-    for (arg <- mappedRDD)
-      print(arg + " ")
-    println()
-    println("math is work")
+    val lines = sc.textFile("hdfs://devcluster/spark.txt")
+    val words = lines.flatMap(line => line.split(" "))
+    val pairs = words.map(word => (word, 1))
+    val wordCounts = pairs.reduceByKey(_ + _)
+    wordCounts.foreach(WordCount => println(WordCount._1 + " : " + WordCount._2))
+
   }
 }
