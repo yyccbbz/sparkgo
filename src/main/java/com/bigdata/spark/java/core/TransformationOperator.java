@@ -4,6 +4,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.VoidFunction;
 import scala.Tuple2;
 
@@ -26,7 +27,11 @@ public class TransformationOperator {
         //map();
         //filter();
         //flatMap();
-        groupByKey();
+        //groupByKey();
+        //reduceByKey();
+        //sortByKey();
+//        join();
+        cogroup();
     }
 
     //1、map：将集合中每个元素乘以2
@@ -130,8 +135,21 @@ public class TransformationOperator {
     private static void reduceByKey() {
         JavaSparkContext sc = new JavaSparkContext(
                 new SparkConf().setAppName("reduceByKey").setMaster("local"));
+        List<Tuple2<String, Integer>> scoreList = Arrays.asList(
+                new Tuple2<String, Integer>("小一班", 89),
+                new Tuple2<String, Integer>("小二班", 75),
+                new Tuple2<String, Integer>("小二班", 94),
+                new Tuple2<String, Integer>("小一班", 66)
+        );
+        JavaPairRDD<String, Integer> scores = sc.parallelizePairs(scoreList);
 
-
+        /**
+         * reduceByKey
+         * 对每个key对应的value进行reduce操作。
+         * 返回的依然是和源RDD类型一致
+         */
+        JavaPairRDD<String, Integer> javaPairRDD = scores.reduceByKey((x, y) -> x + y);
+        javaPairRDD.foreach(t -> System.out.println("班级：" + t._1 + ", 总分数：" + t._2()));
         sc.close();
     }
 
@@ -139,7 +157,22 @@ public class TransformationOperator {
     private static void sortByKey() {
         JavaSparkContext sc = new JavaSparkContext(
                 new SparkConf().setAppName("sortByKey").setMaster("local"));
+        List<Tuple2<Integer, String>> scoreList = Arrays.asList(
+                new Tuple2<Integer, String>(89, "张三"),
+                new Tuple2<Integer, String>(75, "李四"),
+                new Tuple2<Integer, String>(94, "王五"),
+                new Tuple2<Integer, String>(66, "赵六")
+        );
+        JavaPairRDD<Integer, String> scores = sc.parallelizePairs(scoreList);
 
+        /**
+         * sortByKey
+         * 对每个key对应的value进行排序操作。
+         * 返回的依然是和源RDD类型一致，元素内容还是保持不变，只是元素顺序不同
+         * false 参数 为降序
+         */
+        JavaPairRDD<Integer, String> sortedRDD = scores.sortByKey(false);
+        sortedRDD.foreach(t -> System.out.println(t._1 + " = " + t._2));
 
         sc.close();
     }
@@ -149,6 +182,36 @@ public class TransformationOperator {
         JavaSparkContext sc = new JavaSparkContext(
                 new SparkConf().setAppName("join").setMaster("local"));
 
+        List<Tuple2<Integer, String>> studentList = Arrays.asList(
+                new Tuple2<Integer, String>(1, "张三"),
+                new Tuple2<Integer, String>(2, "李四"),
+                new Tuple2<Integer, String>(3, "王五"),
+                new Tuple2<Integer, String>(4, "赵六")
+        );
+        List<Tuple2<Integer, Integer>> scoreList = Arrays.asList(
+                new Tuple2<Integer, Integer>(1, 100),
+                new Tuple2<Integer, Integer>(2, 90),
+                new Tuple2<Integer, Integer>(3, 60),
+                new Tuple2<Integer, Integer>(4, 80)
+        );
+
+        JavaPairRDD<Integer, String> students = sc.parallelizePairs(studentList);
+        JavaPairRDD<Integer, Integer> scores = sc.parallelizePairs(scoreList);
+
+        /**
+         * join
+         * 对两个包含<key,value>对的RDD进行join操作，
+         * 每个key join上的pair，都会传入自定义函数进行处理。
+         * 返回的JavaPairRDD类型，
+         * 第一个泛型类型，是之前两个JavaPairRDD的key类型
+         * 第二个泛型类型，是Tuple2<v1,v2>,
+         * v1是第一个源RDD的value类型
+         * v2是第二个源RDD的value类型
+         */
+        JavaPairRDD<Integer, Tuple2<String, Integer>> studentScores = students.join(scores);
+        studentScores.foreach(t -> {
+            System.out.println("序号:" + t._1 + " , 姓名:" + t._2._1 + ", 分数:" + t._2._2);
+        });
 
         sc.close();
     }
@@ -157,8 +220,42 @@ public class TransformationOperator {
     private static void cogroup() {
         JavaSparkContext sc = new JavaSparkContext(
                 new SparkConf().setAppName("cogroup").setMaster("local"));
+        List<Tuple2<Integer, String>> studentList = Arrays.asList(
+                new Tuple2<Integer, String>(1, "张三"),
+                new Tuple2<Integer, String>(2, "李四"),
+                new Tuple2<Integer, String>(3, "王五"),
+                new Tuple2<Integer, String>(4, "赵六")
+        );
+        List<Tuple2<Integer, Integer>> scoreList = Arrays.asList(
+                new Tuple2<Integer, Integer>(1, 100),
+                new Tuple2<Integer, Integer>(2, 90),
+                new Tuple2<Integer, Integer>(3, 60),
+                new Tuple2<Integer, Integer>(4, 80),
+                new Tuple2<Integer, Integer>(1, 50),
+                new Tuple2<Integer, Integer>(2, 40),
+                new Tuple2<Integer, Integer>(3, 30),
+                new Tuple2<Integer, Integer>(4, 20)
+        );
 
+        JavaPairRDD<Integer, String> students = sc.parallelizePairs(studentList);
+        JavaPairRDD<Integer, Integer> scores = sc.parallelizePairs(scoreList);
 
+        /**
+         * cogroup
+         * 同join，但是是每个key对应的Iterable<value>都会传入自定义函数进行处理
+         * 相当于一个key join上的所有value都放到一个Iterable里面去了
+         */
+        JavaPairRDD<Integer, Tuple2<Iterable<String>, Iterable<Integer>>> cogroup = students.cogroup(scores);
+
+        cogroup.foreach(t -> {
+            System.out.println("id = " + t._1);
+            System.out.println("name = " + t._2._1);
+            System.out.println("score = " + t._2._2);
+//            System.out.println(t._1 + " " + t._2);
+//            t._2._1.forEach(name -> System.out.println("name = " + name));
+//            t._2._2.forEach(score -> System.out.println("score = " + score));
+            System.out.println("=======================================");
+        });
         sc.close();
     }
 
