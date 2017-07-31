@@ -1,11 +1,14 @@
 package com.bigdata.spark.java.core;
 
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import scala.Tuple2;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +22,8 @@ public class ActionOperator {
 
     public static void main(String[] args) {
 
-        saveAsTextFile();
+        countByKey();
+//        saveAsTextFile();
 //        take();
 //        count();
 //        collect();
@@ -33,7 +37,7 @@ public class ActionOperator {
      * 4、take：获取RDD中前n个元素。
      * 5、saveAsTextFile：将RDD元素保存到文件中，对每个元素调用toString方法
      * 6、countByKey：对每个key对应的值进行count计数
-     * 7、foreach：遍历RDD中的每个元素
+     * 7、foreach：遍历RDD中的每个元素,在远程集群上进行，性能要好
      */
     private static void reduce() {
         JavaSparkContext sc = new JavaSparkContext(
@@ -118,5 +122,31 @@ public class ActionOperator {
 
         sc.close();
     }
+
+    private static void countByKey() {
+        JavaSparkContext sc = new JavaSparkContext(
+                new SparkConf().setAppName("countByKey").setMaster("local"));
+
+        List<Tuple2<String, String>> studentsList = Arrays.asList(
+                new Tuple2<String, String>("class1", "spark"),
+                new Tuple2<String, String>("class2", "java"),
+                new Tuple2<String, String>("class1", "kafka"),
+                new Tuple2<String, String>("class2", "scala"),
+                new Tuple2<String, String>("class1", "hadoop")
+        );
+        JavaPairRDD<String, String> students = sc.parallelizePairs(studentsList);
+
+        /**
+         * countByKey
+         * 返回的是一个map集合
+         *
+         */
+        Map<String, Object> map = students.countByKey();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+        sc.close();
+    }
+
 
 }

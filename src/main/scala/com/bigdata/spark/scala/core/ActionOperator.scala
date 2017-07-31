@@ -14,8 +14,8 @@ object ActionOperator {
 
   def main(args: Array[String]): Unit = {
 
-
-    saveAsTextFile()
+    countByKey()
+    //saveAsTextFile()
     //take()
     //count()
     //collect()
@@ -65,5 +65,16 @@ object ActionOperator {
       .saveAsTextFile("hdfs://bd-cdh-master01:8020/double_number")
   }
 
+  def countByKey() {
+    val sc = new SparkContext(
+      new SparkConf().setAppName("countByKey").setMaster("local"))
+
+    val tuples = Array(("class1", "spark"), ("class2", "java"),
+      ("class1", "kafka"), ("class2", "scala"), ("class1", "hadoop"))
+
+    val map = sc.parallelize(tuples).countByKey()
+    println(map)
+//      .foreach(t => println(t._1 + " : " + t._2))
+  }
 
 }
