@@ -25,7 +25,8 @@ public class GroupTop3 {
         JavaSparkContext sc = new JavaSparkContext(
                 new SparkConf().setAppName("Top3").setMaster("local"));
 
-        JavaRDD<String> lines = sc.textFile("E:\\Workspace\\intellij2017\\sparkgo\\src\\main\\resources\\txt\\score.txt");
+//        JavaRDD<String> lines = sc.textFile("E:\\Workspace\\intellij2017\\sparkgo\\src\\main\\resources\\txt\\score.txt");
+        JavaRDD<String> lines = sc.textFile("E:\\Users\\IdeaProjects\\sparkgo\\src\\main\\resources\\txt\\score.txt");
 
         JavaPairRDD<String, Iterable<Integer>> pairRDD = lines.mapToPair(line ->
                 new Tuple2<String, Integer>(line.split(" ")[0], Integer.parseInt(line.split(" ")[1])))
