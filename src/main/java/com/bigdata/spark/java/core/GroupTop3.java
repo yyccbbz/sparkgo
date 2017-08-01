@@ -45,7 +45,7 @@ public class GroupTop3 {
                         break;
                     } else if (top3[i] > value) { //索引处的值比value大
                         // 该位置之后的值向后移动
-                        for (int j = top3.length - 1; j > i; j--) {
+                        for (int j = 2; j > i; j--) {
                             top3[j] = top3[j - 1];
                         }
                         top3[i] = value;
@@ -58,12 +58,12 @@ public class GroupTop3 {
         });
 
         top3Pairs.foreach(t -> {
-            System.out.println("班级 " + t._1);
+            System.out.print(t._1);
             Iterator<Integer> iter = t._2.iterator();
             while (iter.hasNext()) {
-                System.out.println("分数 " + iter.next());
+                System.out.print("\t" + iter.next());
             }
-            System.out.println("===========================");
+            System.out.println();
         });
 
         sc.close();
