@@ -43,7 +43,7 @@ public class GroupTop3 {
                     if (top3[i] == null) {
                         top3[i] = value;
                         break;
-                    } else if (top3[i] > value) { //索引处的值比value大
+                    } else if (value > top3[i]) { //value比索引处的值大
                         // 该位置之后的值向后移动
                         for (int j = 2; j > i; j--) {
                             top3[j] = top3[j - 1];
