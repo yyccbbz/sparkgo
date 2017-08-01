@@ -1,9 +1,9 @@
 package com.bigdata.spark.java.core;
 
+import org.apache.spark.Accumulator;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.broadcast.Broadcast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,27 +14,26 @@ import java.util.List;
  * @Author: CuiCan
  * @Date: 2017-7-31
  * @Time: 15:08
- * @Description: 广播变量
+ * @Description: 累加变量
  */
-public class BroadcastVariable {
+public class AccumulatorDemo {
 
     public static void main(String[] args) {
         JavaSparkContext sc = new JavaSparkContext(
-                new SparkConf().setAppName("BroadcastVariable").setMaster("local"));
+                new SparkConf().setAppName("accumulatorDemo").setMaster("local"));
 
-        final int factor = 3;
-        //定义广播变量
-        final Broadcast<Integer> factorBroadcast = sc.broadcast(factor);
+        //定义累加变量
+        Accumulator<Integer> sum = sc.accumulator(0);
 
         List<Integer> numList = Arrays.asList(1, 2, 3, 4, 5);
         JavaRDD<Integer> nums = sc.parallelize(numList);
 
         /**
-         * 让集合中每个元素都乘以factor
+         * 用累加变量对集合中的元素求和
          *
          */
-        JavaRDD<Integer> newNums = nums.map(n -> n * factorBroadcast.value());
-        newNums.foreach(n -> System.out.println("n = " + n));
+        nums.foreach(n -> sum.add(n));
+        System.out.println("累加后的值： " + sum.value());
 
         sc.close();
     }
