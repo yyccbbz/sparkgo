@@ -74,25 +74,32 @@ object FuncDemo {
   }
 
 
-  //
-  //
+  // 过程 过程通常用于不需要返回值的函数。
+  def sayHello11(name: String) = "Hello, " + name
+  def sayHello12(name: String) { print("Hello, " + name); "Hello, " + name }
+  def sayHello13(name: String): Unit = "Hello, " + name
+
+
+  // lazy
+
+
+  // 异常
 
   def main(args: Array[String]): Unit = {
 
-    println(sum3(1 to 10: _*))
-    println(sum1(1, 2, 3, 4, 5))
 
-    /*println(sayHello2("Mick", lastName = "Nina", middleName = "Jack"))
-    println(sayHello2(firstName = "Mick", lastName = "Nina", middleName = "Jack"))
 
-    sayHe3("zizou")
-    println(sayHello2("zizou", "raule", "ruby"))
-    println(fab(10))
-    println(sum(10))
-    sayHello1("zidane")
-    println(sayHello("Leo",14))*/
+//    println(sum3(1 to 10: _*))
+//    println(sum1(1, 2, 3, 4, 5))
+//    printlsayHello2("Mick", lastName = "Nina", middleName = "Jack"))
+//    println(sayHello2(firstName = "Mick", lastName = "Nina", middleName = "Jack"))
+//    sayHe3("zizou")
+//    println(sayHello2("zizou", "raule", "ruby"))
+//    println(fab(10))
+//    println(sum(10))
+//    sayHello1("zidane")
+//    println(sayHello("Leo",14))
 
   }
-
 
 }
