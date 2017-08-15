@@ -1,9 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/
 sparkgo.iml
-src/main/java/com/bigdata/spark/java/sql/
-src/main/java/com/bigdata/spark/java/streaming/
-src/main/scala/com/bigdata/spark/scala/sql/
-src/main/scala/com/bigdata/spark/scala/streaming/
-src/test/
 target/
