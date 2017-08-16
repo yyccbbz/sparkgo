@@ -36,14 +36,14 @@ object RDD2DataFrameReflection extends App {
   val teenagerRDD = teenagerDF.rdd
 
   // scala中 row的顺序不会打乱，且对row的计算更加丰富
-  /*teenagerRDD.map(row => Student(row(0).toString.toInt, row(1).toString, row(2).toString.toInt))
+  teenagerRDD.map(row => Student(row(0).toString.toInt, row(1).toString, row(2).toString.toInt))
     .collect()
-    .foreach(s => println(s.id + " : " + s.name + " : " + s.age))*/
+    .foreach(s => println(s.id + " : " + s.name + " : " + s.age))
 
   // row的getAs()方法，获取指定列名的列
-  /* teenagerRDD.map(row => Student(row.getAs[Int]("id"),row.getAs[String]("name"),row.getAs[Int]("age")))
+   teenagerRDD.map(row => Student(row.getAs[Int]("id"),row.getAs[String]("name"),row.getAs[Int]("age")))
      .collect()
-     .foreach(s => println(s.id + " : " + s.name + " : " + s.age))*/
+     .foreach(s => println(s.id + " : " + s.name + " : " + s.age))
 
   // 还可以通过 row的getValuesMap()方法，获取指定的几列的值，返回的是个Map
   teenagerRDD.map(row => {

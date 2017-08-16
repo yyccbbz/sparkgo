@@ -70,11 +70,11 @@
 
         <plugins>
 
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.0.0</version>
-                <!-- 设置assembly的打包细节 -->
+                &lt;!&ndash; 设置assembly的打包细节 &ndash;&gt;
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -85,7 +85,7 @@
                         </manifest>
                     </archive>
                 </configuration>
-                <!-- 设置maven的某个生命周期与插件的那个目标相互绑定 -->
+                &lt;!&ndash; 设置maven的某个生命周期与插件的那个目标相互绑定 &ndash;&gt;
                 <executions>
                     <execution>
                         <id>make-assembly</id>
@@ -95,7 +95,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.scala-tools</groupId>
