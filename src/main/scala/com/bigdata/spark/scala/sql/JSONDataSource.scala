@@ -58,15 +58,15 @@ object JSONDataSource {
     // 将分数大于80分的学生的成绩信息与基本信息进行join
     val goodStudentsRDD = goodStudentScoresDF.rdd.map(row => (row.getAs[String]("name"), row.getAs[Long]("score")))
       .join(goodStudentInfosDF.rdd.map(row => (row.getAs[String]("name"), row.getAs[Long]("age"))))
+    /**Long型的表达式不符合预期类型Nothing*/
+
 
     // 将rdd转换为dataframe
-    val goodStudentRowsRDD = goodStudentsRDD.map(t => Row(t._1, t._2._1.toInt, t._2._1.toInt))
+    val goodStudentRowsRDD = goodStudentsRDD.map(t => Row(t._1, t._2._1.toInt, t._2._2.toInt))
 
-    val structType = StructType(Array(
-      StructField("name", StringType, true),
-      StructField("score", IntegerType, true),
-      StructField("age", IntegerType, true)
-    ))
+    val structType = StructType(Array(StructField("name", StringType, true),
+                                      StructField("score", IntegerType, true),
+                                      StructField("age", IntegerType, true)))
 
     val goodStudentsDF = sqlContext.createDataFrame(goodStudentRowsRDD, structType)
 
