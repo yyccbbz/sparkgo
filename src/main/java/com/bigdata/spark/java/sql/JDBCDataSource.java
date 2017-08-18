@@ -8,12 +8,14 @@ import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
-import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import scala.Tuple2;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +48,8 @@ public class JDBCDataSource {
         // 分别将mysql中两张表的数据加载为DataFrame
         Map<String, String> options = new HashMap<String, String>();
         options.put("url", "jdbc:mysql://116.62.134.242:3306/testdb");
+        options.put("user", "root");
+        options.put("password", "HdWiFi@2016!");
         options.put("dbtable", "student_infos");
         DataFrame studentInfosDF = sqlContext.read().format("jdbc").options(options).load();
 
@@ -53,10 +57,10 @@ public class JDBCDataSource {
         DataFrame studentScoresDF = sqlContext.read().format("jdbc").options(options).load();
 
         // 将两个DataFrame转换为JavaPairRDD，执行join操作
-        JavaPairRDD<String, Tuple2<Integer, Integer>> studentsRDD = studentInfosDF.javaRDD().mapToPair(row -> new Tuple2<String, Integer>(row.getString(0), row.getInt(1)))
+        JavaPairRDD<String, Tuple2<Integer, Integer>> studentsRDD = studentInfosDF.javaRDD()
+                .mapToPair(row -> new Tuple2<String, Integer>(row.getString(0), row.getInt(1)))
                 .join(studentScoresDF.javaRDD()
-                        .mapToPair(row ->
-                                new Tuple2<String, Integer>(row.getString(0), row.getInt(1))));
+                        .mapToPair(row -> new Tuple2<String, Integer>(row.getString(0), row.getInt(1))));
 
 
         // 将JavaPairRDD转换为JavaRDD<Row>
@@ -90,9 +94,36 @@ public class JDBCDataSource {
 
         // 将DataFrame中的数据保存到mysql表中
         // 这种方式是在企业里很常用的，有可能是插入mysql、有可能是插入hbase，还有可能是插入redis缓存
-        studentsDF.javaRDD().foreach(row ->{
+        studentsDF.javaRDD().foreach(row -> {
+
+            String sql = "insert into good_student_infos values("
+                    + "'" + String.valueOf(row.getString(0)) + "',"
+                    + Integer.valueOf(String.valueOf(row.get(1))) + ","
+                    + Integer.valueOf(String.valueOf(row.get(2))) + ")";
+
+            Class.forName("com.mysql.jdbc.Driver");
+
+            Connection conn = null;
+            Statement stmt = null;
+            try {
+                conn = DriverManager.getConnection(
+                        "jdbc:mysql://116.62.134.242:3306/testdb", "root", "HdWiFi@2016!");
+                stmt = conn.createStatement();
+                stmt.executeUpdate(sql);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            }
 
         });
+
+        sc.close();
     }
 
 }
