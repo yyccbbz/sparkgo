@@ -24,7 +24,7 @@ public class FieldTest {
         String[] plats = {"Android", "IOS", "Windows", "MacOS", "Linux"};
         String[] verss = {"1.0", "2.0", "3.0", "4.0", "5.0"};
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             int r1 = random5();
             int r2 = random5();
             int r3 = random5();
