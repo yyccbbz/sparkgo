@@ -8,7 +8,6 @@ import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
-import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
@@ -36,7 +35,7 @@ import java.util.*;
 public class DailyTop3Keyword {
     public static void main(String[] args) {
 
-        SparkConf conf = new SparkConf().setAppName("DailyTop3Keyword").setMaster("local");
+        SparkConf conf = new SparkConf().setAppName("DailyTop3Keyword");
         JavaSparkContext sc = new JavaSparkContext(conf);
         HiveContext hiveContext = new HiveContext(sc.sc());
 
@@ -52,8 +51,7 @@ public class DailyTop3Keyword {
         final Broadcast<Map<String, List<String>>> PARAM = sc.broadcast(queryParamMap);
 
         // 1、针对原始数据（HDFS文件），获取输入的RDD
-        JavaRDD<String> lines = sc.textFile("E:\\Workspace\\intellij2017\\" +
-                "sparkgo\\src\\main\\resources\\txt\\keyword.txt", 5);
+        JavaRDD<String> lines = sc.textFile("hdfs://devcluster/spark/resources/keyword.txt", 5);
 
 
         // 2、使用filter算子，去针对输入RDD中的数据，进行数据过滤，过滤出符合查询条件的数据。
@@ -202,7 +200,7 @@ public class DailyTop3Keyword {
         // 9、再次映射为DataFrame，并将数据保存到Hive中即可
         DataFrame df = hiveContext.createDataFrame(sortedRowRDD, structType);
 
-//        df.saveAsTable("daily_top3_keyword_uv");
+        df.saveAsTable("daily_top3_keyword_uv");
 
         df.show();
 
